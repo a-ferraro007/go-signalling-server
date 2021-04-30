@@ -58,12 +58,10 @@ func (c *CoopMap) insertIntoCoop(id string, host bool,  w *websocket.Conn) {
 
 	if c.Map[id] != nil {
 		pool := c.Map[id][0] //Get the connection pool for the roomID
-		p := &Participant{host, w, pool} //New participant for this room
+		participant := &Participant{host, w, pool} //New participant for this room
 
-		pool.Register <- p //Add Participant to the connection Pool
-
-		//Potential bottleneck here if room gets too big or too many rooms?
-		go p.Read(pool) //Start reading messages in a coccurrenttly
+		pool.Register <- participant //Add Participant to the connection Pool
+		go participant.Read(pool)
 	}
 }
 

@@ -15,9 +15,8 @@ type Participant struct {
 }
 
 type Message struct {
-	Type int `"json:type"`
-	Body string `"json:type"`
-	Client *websocket.Conn
+	Message map[string]interface{}
+	Client *Participant
 }
 
 func (c *Participant) Read(pool *Pool) {
@@ -27,15 +26,19 @@ func (c *Participant) Read(pool *Pool) {
 	}()
 
 	for {
-		messageType, p, err := c.Conn.ReadMessage()
+		msg := Message{Client: c}
+		err := c.Conn.ReadJSON(&msg.Message) //ReadJSON
+
+		log.Println("LOG MESSAGE:")
+		log.Println(msg.Message)
 
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		message := Message{Type: messageType, Body: string(p), Client: c.Conn}
-		pool.Broadcast <- message
-		fmt.Printf("Message Received: %+v\n", message)
+
+		pool.Broadcast <- msg
+		fmt.Printf("Message Received: %+v\n", msg)
 	}
 
 }

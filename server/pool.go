@@ -20,31 +20,36 @@ func NewPool() *Pool {
 	}
 }
 
+//Temporary way to send back a {join:true} JSON response
+//When a participant enters a room
+type Register struct {
+	Join bool `json:"join"`
+}
+
 func (pool *Pool) Start() {
 	for {
 		select {
-			case client := <-pool.Register: //pop? a client of the Register channel (chan *Client). set it true in the pool Clients Map.
+			case client := <-pool.Register:
 				pool.Clients[client] = true
 				fmt.Println("Size of the connection Pool: ", len(pool.Clients))
 				for client, _ := range pool.Clients {
-					fmt.Println(client)
-					client.Conn.WriteJSON(Message{Type: 1, Body: "New User Joined ... "})
+					msg := Register{true}
+					client.Conn.WriteJSON(msg)
 				}
 				break
-			case client := <-pool.Unregister: //pop? a client of the Register channel (chan *Client). delete from the pool.
+			case client := <-pool.Unregister:
 				delete(pool.Clients, client)
 				fmt.Println("Size of the connection Pool: ", len(pool.Clients))
 				for client, _ := range pool.Clients {
 					fmt.Println(client)
-					client.Conn.WriteJSON(Message{Type: 1, Body: "User disconnected ... "})
 				}
 				break
 			case message := <-pool.Broadcast:
 				fmt.Println("Sending Message to All Connected Clients: ", len(pool.Clients)  - 1)
+				fmt.Println(message.Message)
 				for client, _ := range pool.Clients {
-					fmt.Println(pool.Clients[client])
-					if message.Client != client.Conn {
-						if err := client.Conn.WriteJSON(message); err != nil {
+					if message.Client.Conn != client.Conn {
+						if err := client.Conn.WriteJSON(message.Message); err != nil {
 							fmt.Println(err)
 							return
 					}

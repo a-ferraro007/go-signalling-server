@@ -17,6 +17,10 @@ type resp struct {
 	RoomID string `json:"roomID"`
 }
 
+type respMap struct {
+	Rooms []string `json:"rooms"`
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize: 1024,
 	WriteBufferSize: 1024,
@@ -48,7 +52,6 @@ func CreateCoopRequestHandler(w http.ResponseWriter, r *http.Request)  {
 
 //Join Coop
 func JoinCoopRequestHandler(w http.ResponseWriter, r *http.Request) {
-	//ws, err := AllCoops.Upgrader(w, r)
 	roomId, ok := r.URL.Query()["roomID"]
 
 	if !ok {
@@ -57,12 +60,18 @@ func JoinCoopRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws, _  := Upgrader(w, r)
-
 	AllCoops.insertIntoCoop(strings.Join(roomId, " "), false, ws)
-
 }
 
 func GetCoopsRequestHandler(w http.ResponseWriter, r *http.Request)  {
-	fmt.Fprintln(w, AllCoops.Map)
+	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	resp := make([]string, 0)
+
+	for i, _ := range AllCoops.Map {
+		resp = append(resp, i)
+	}
+
+	fmt.Println(resp)
+	json.NewEncoder(w).Encode(respMap{Rooms: resp})
 }
 
