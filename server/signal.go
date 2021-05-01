@@ -60,7 +60,7 @@ func JoinCoopRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws, _  := Upgrader(w, r)
-	AllCoops.insertIntoCoop(strings.Join(roomId, " "), false, ws)
+	AllCoops.insertIntoCoop(strings.Join(roomId, " "), ws)
 }
 
 func GetCoopsRequestHandler(w http.ResponseWriter, r *http.Request)  {

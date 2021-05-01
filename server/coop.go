@@ -52,13 +52,13 @@ func (c *CoopMap) createCoop() string {
 }
 
 //insert into Coop and start reading messages
-func (c *CoopMap) insertIntoCoop(id string, host bool,  w *websocket.Conn) {
+func (c *CoopMap) insertIntoCoop(id string, w *websocket.Conn) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
 	if c.Map[id] != nil {
 		pool := c.Map[id][0] //Get the connection pool for the roomID
-		participant := &Participant{host, w, pool} //New participant for this room
+		participant := &Participant{w, pool} //New participant for this room
 
 		pool.Register <- participant //Add Participant to the connection Pool
 		go participant.Read(pool)

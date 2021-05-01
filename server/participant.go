@@ -8,7 +8,6 @@ import (
 )
 
 type Participant struct {
-	Host bool
 	Conn *websocket.Conn
 	Coop *Pool
 	//other user information?

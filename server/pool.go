@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 )
 
 type Pool struct {
@@ -20,12 +21,6 @@ func NewPool() *Pool {
 	}
 }
 
-//Temporary way to send back a {join:true} JSON response
-//When a participant enters a room
-type Register struct {
-	Join bool `json:"join"`
-}
-
 func (pool *Pool) Start() {
 	for {
 		select {
@@ -33,8 +28,7 @@ func (pool *Pool) Start() {
 				pool.Clients[client] = true
 				fmt.Println("Size of the connection Pool: ", len(pool.Clients))
 				for client, _ := range pool.Clients {
-					msg := Register{true}
-					client.Conn.WriteJSON(msg)
+					log.Println(client)
 				}
 				break
 			case client := <-pool.Unregister:
